@@ -1,0 +1,64 @@
+---
+title: "Day_11_Diversity_continued"
+author: "Cole LaCroix"
+date: "2025-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library( ape )
+library( phytools )
+library( plotrix )
+source( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/clarkFunctions2025-3.R')
+```
+
+```{r}
+tree <- read.tree( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/plantFamily.tre' )
+fams <- read.csv( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/plantFamily.csv' )
+
+par( mar = c(1, 4, .3, .4), omi = c(0, .3, .1, 0) )
+plot.phylo(tree, cex = .4, tip.color = fams$col, node.color = fams$col,
+           edge.width = 1.2, direction = 'upwards' )
+axisPhylo( side = 2 )
+
+leg  <- fams$group[ !duplicated( fams$col ) ]
+cols <- fams$col[ !duplicated( fams$col ) ]
+legend( 'bottomright', legend = leg, text.col = cols, bty = 'n', cex = .95 )
+mtext( 'Mya', 2, line = 3 )
+```
+```{r}
+tree <- read.tree( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/phyloAfroBigMammals.tre' )
+gens <- read.csv(  '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/phyloAfroBigMammals.csv' )
+
+# orders with megaherbivores at KNP
+include <- c( 'Perissodactyla', 'Artiodactyla', 'Proboscidea' )
+
+ww <- which( gens$order %in% include )
+wn <- which( !gens$order %in% include )
+gens <- gens[ww,]
+tree <- drop.tip( tree, wn )              # drop the tips that are not in include
+
+ww <- which( !duplicated( gens$genus ) )  # only one species per genus
+wn <- which( duplicated( gens$genus ) )
+gens <- gens[ww,]
+tree <- drop.tip( tree, wn )
+tree$tip.label <- gens$genus
+
+ords <- table( gens$order )               # assign colors to orders
+cols <- colorRampPalette( colContrast )(length(ords))
+names( cols ) <- names( ords )
+col  <- cols[ gens$order ]
+
+par( mar = c(1, 4, .3, .4), omi = c(0, .3, .1, 0) )
+plot.phylo(tree, cex = .6, tip.color = col, node.color = col, 
+           edge.width = 1.2, direction = 'upwards' )
+axisPhylo( side = 2 )
+
+legend( 'topleft', legend = names( cols ), text.col = cols, bty = 'n', cex = .9 )
+mtext( 'Mya', 2, line = 3 )
+```
+

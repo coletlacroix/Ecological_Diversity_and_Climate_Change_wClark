@@ -1,0 +1,32 @@
+---
+title: "Day_10_Diversity"
+author: "Cole LaCroix"
+date: "2025-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library( ape )
+library( phytools )
+library( plotrix )
+source( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/clarkFunctions2025-3.R')
+```
+```{r}
+tree <- read.tree( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/plantFamily.tre' )
+fams <- read.csv( '/Users/GitHub Projects/Ecological_Diversity_and_Climate_Change_wClark/Clark files/plantFamily.csv' )
+
+par( mar = c(1, 4, .3, .4), omi = c(0, .3, .1, 0) )
+plot.phylo(tree, cex = .4, tip.color = fams$col, node.color = fams$col,
+           edge.width = 1.2, direction = 'upwards' )
+axisPhylo( side = 2 )
+
+leg  <- fams$group[ !duplicated( fams$col ) ]
+cols <- fams$col[ !duplicated( fams$col ) ]
+legend( 'bottomright', legend = leg, text.col = cols, bty = 'n', cex = .95 )
+mtext( 'Mya', 2, line = 3 )
+```
+
