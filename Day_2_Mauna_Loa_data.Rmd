@@ -1,0 +1,73 @@
+---
+title: "Day_2_Mauna_Loa_data"
+author: "Cole LaCroix"
+date: "2025-02-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library( lubridate )
+```
+
+```{r}
+mw <- read.table('https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_weekly_mlo.txt')
+
+# select columns and assign new names
+mw <- mw[, c(1, 2, 3, 5)]
+names(mw) <- c('year', 'month', 'day', 'co2ppm')
+
+# date format
+mw$date <- as.Date(paste(mw$year, mw$month, mw$day, sep = '-'), format = '%Y-%m-%d')
+mw$time <- decimal_date( mw$date ) 
+
+# only necessary columns
+mw <- mw[, c('date', 'year', 'time', 'co2ppm')]
+
+# only complete years
+mw <- mw[ mw$time < 2025, ]
+
+# missing values
+mw[mw$co2ppm == -999.99, ]$co2ppm = NA
+head(mw) 
+```
+```{r}
+par( mfrow = c( 3,1 ), bty = 'n', mar = c( 2, 4, 1, 1 ), omi = c(.5,.5,.5,.5) )
+plot(mw$date, mw$co2ppm, type = 'l', lwd = 2,
+     xlab = '', ylab = '', xaxt = 'n',
+     main = 'Mauna Loa Weekly' )
+
+# annual averages
+plot( mw$time, mw$co2ppm, type = 'l', col = 'grey', lwd = 2, xaxt = 'n',
+      xlab = '', ylab = '', main = 'Annual' )
+annual <- tapply( mw$co2ppm, mw$year, mean, na.rm = T )
+yr <- as.numeric( names( annual ) )
+lines( yr, annual, col = 2, lwd = 2)
+
+# change in annual
+
+plot( yr[-1], diff( annual ), type = 'l', 
+      xlab = 'Year', ylab = '', main = 'Rate (ppmV/yr)' )
+abline( h = mean( diff( annual ) ), lty = 2, col = 'grey', lwd = 2 )
+mtext( 'Year', 1, line = 1, outer = T )
+mtext( 'CO2 (ppmV)', 2, outer = T )
+```
+```{r}
+par( bty = 'n' )
+plot( NA, xlim = c(0, 1), ylim = range( mw$co2ppm, na.rm=T ), 
+      xlab = 'Month', ylab = 'ppmv', xaxt = 'n' )
+month <- seq(0, 12, by = 2 )
+axis(1, at = month/12, labels = month )
+years <- sort( unique( mw$year ) )
+cols <- colorRampPalette( c('#d53e4f','#fc8d59','#fee08b',
+                            '#e6f598','#99d594','#3288bd') )
+cols <- cols( length(years) )
+for( j in 1:length(years)){
+  wj <- which( mw$year == years[j] )
+  lines( mw$time[wj] - years[j], mw$co2ppm[wj], col = cols[j] )
+}
+```
+
